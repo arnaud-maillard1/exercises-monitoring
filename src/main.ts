@@ -3,8 +3,11 @@ import './style.css'
 import App from './App.vue'
 import { db } from './data/database'
 import { demanderStockagePersistant } from './data/persistence'
+import router from './router'
 
-createApp(App).mount('#app')
+const app = createApp(App)
+app.use(router)
+app.mount('#app')
 
 async function initialiserStockage() {
     await db.open()

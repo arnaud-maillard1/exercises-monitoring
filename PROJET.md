@@ -58,7 +58,7 @@ Session     : liste d'exercices sélectionnés — UNE SEULE session courante
 - [x] **1. Init projet Vue 3 + Vite + TypeScript** — FAIT (dev server OK).
 - [x] **2. Configurer la PWA** — vite-plugin-pwa : manifest (nom, icônes, thème), service worker offline, cache. Génère les icônes. Touche surtout `vite.config.ts`.
 - [x] **3. Stockage Dexie** — schéma des tables (eleves, themes, exercices, progressions, session/config) + couche d'accès (composables). Activer `navigator.storage.persist()`. Définir les types TS (dont `type Etat = 'rien' | 'en cours' | 'terminé'`).
-- [ ] **4. Navigation + layout global** — router (ou onglets) entre les 4 pages ; barre de nav ; styles de base. Réécrit `App.vue`.
+- [x] **4. Navigation + layout global** — router (ou onglets) entre les 4 pages ; barre de nav ; styles de base. Réécrit `App.vue`.
 - [ ] **5. Page « Ma classe »** — CRUD élèves, tri alpha, flèches ↑/↓, confirmations.
 - [ ] **6. Page « Thèmes & exercices »** — CRUD thèmes + exercices, cascade, tri, flèches.
 - [ ] **7. Composant tableau de progression réutilisable** — paramétrable : filtre exercices (tous vs session) + mode d'édition (clic-qui-défile vs menu déroulant) ; couleurs + légende. Utilisé par les pages 8 et 9.

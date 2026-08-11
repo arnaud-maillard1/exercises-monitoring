@@ -13,7 +13,7 @@ const navigation = [
   <div class="app-shell">
     <header class="app-header">
       <RouterLink class="app-name" to="/">
-        Suivi d’exercices
+        Suivi d'exercices
       </RouterLink>
 
       <nav class="app-navigation" aria-label="Navigation principale">

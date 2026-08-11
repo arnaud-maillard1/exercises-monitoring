@@ -394,3 +394,163 @@
     max-width: none;
   }
 }
+
+.catalog-toolbar {
+  display: grid;
+  gap: 20px;
+  margin-top: 36px;
+  padding: 20px 0;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.catalog-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+  width: min(100%, 720px);
+}
+
+.exercise-create-form {
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 280px) auto;
+  width: min(100%, 980px);
+}
+
+.catalog-sort-button {
+  justify-self: start;
+}
+
+.theme-list {
+  margin-top: 36px;
+}
+
+.theme-section {
+  padding: 0 0 40px;
+  border-top: 2px solid #cbd5e1;
+}
+
+.theme-header {
+  display: grid;
+  grid-template-columns: 36px minmax(180px, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 88px;
+  padding: 16px 0;
+}
+
+.theme-title h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.theme-title span {
+  display: block;
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.theme-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-edit-form {
+  grid-column: 2 / -1;
+}
+
+.exercise-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.exercise-heading h3 {
+  margin: 0;
+  color: #475569;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.theme-empty {
+  margin: 0;
+  padding: 24px 0;
+  border-bottom: 1px solid #e2e8f0;
+  color: #94a3b8;
+}
+
+.exercise-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.exercise-row {
+  display: grid;
+  grid-template-columns: 36px minmax(180px, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 68px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.exercise-name {
+  color: #334155;
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .exercise-create-form {
+    grid-template-columns: minmax(220px, 1fr) minmax(180px, 240px);
+  }
+
+  .exercise-create-form .primary-button {
+    justify-self: start;
+  }
+
+  .theme-header,
+  .exercise-row {
+    grid-template-columns: 28px 1fr;
+  }
+
+  .theme-actions,
+  .exercise-row .student-actions {
+    grid-column: 2;
+    flex-wrap: wrap;
+  }
+
+  .theme-edit-form,
+  .exercise-row .edit-form {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 620px) {
+  .catalog-form,
+  .exercise-create-form {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-form .primary-button,
+  .exercise-create-form .primary-button {
+    justify-self: stretch;
+  }
+
+  .theme-select-field {
+    width: 100%;
+  }
+
+  .exercise-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

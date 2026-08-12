@@ -1,4 +1,9 @@
 import ExcelJS from 'exceljs'
+import {
+    CLE_NOM_BRANCHE,
+    lireNomBranche,
+    nomPourFichier,
+} from '../data/configuration'
 import { db } from '../data/database'
 import type { Etat, Exercice, Theme } from '../data/models'
 
@@ -58,16 +63,30 @@ export async function exporterSuiviExcel(): Promise<void> {
         db.themes,
         db.exercices,
         db.progressions,
+        db.configuration,
         async () => {
-            const [eleves, themes, exercices, progressions] =
+            const [
+                eleves,
+                themes,
+                exercices,
+                progressions,
+                configurationNom,
+            ] =
                 await Promise.all([
                     db.eleves.orderBy('ordre').toArray(),
                     db.themes.orderBy('ordre').toArray(),
                     db.exercices.toArray(),
                     db.progressions.toArray(),
+                    db.configuration.get(CLE_NOM_BRANCHE),
                 ])
 
-            return { eleves, themes, exercices, progressions }
+            return {
+                eleves,
+                themes,
+                exercices,
+                progressions,
+                nomBranche: lireNomBranche(configurationNom?.valeur),
+            }
         },
     )
 
@@ -134,7 +153,7 @@ export async function exporterSuiviExcel(): Promise<void> {
     const derniereColonne = exercicesOrdonnes.length + 1
     feuille.mergeCells(1, 1, 1, derniereColonne)
     const titre = feuille.getCell(1, 1)
-    titre.value = "Suivi d'exercices"
+    titre.value = `Suivi d'exercices — ${donnees.nomBranche}`
     titre.font = {
         name: 'Arial',
         size: 18,
@@ -317,11 +336,10 @@ export async function exporterSuiviExcel(): Promise<void> {
     }
 
     const contenu = await classeur.xlsx.writeBuffer()
-    const octets = new Uint8Array(contenu.byteLength)
-    octets.set(contenu)
+    const octets = new Uint8Array(contenu)
 
     telechargerFichier(
         octets,
-        `suivi-exercices-${datePourNomFichier(maintenant)}.xlsx`,
+        `suivi-${nomPourFichier(donnees.nomBranche)}-${datePourNomFichier(maintenant)}.xlsx`,
     )
 }

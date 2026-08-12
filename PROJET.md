@@ -59,12 +59,12 @@ Session     : liste d'exercices sélectionnés — UNE SEULE session courante
 - [x] **2. Configurer la PWA** — vite-plugin-pwa : manifest (nom, icônes, thème), service worker offline, cache. Génère les icônes. Touche surtout `vite.config.ts`.
 - [x] **3. Stockage Dexie** — schéma des tables (eleves, themes, exercices, progressions, session/config) + couche d'accès (composables). Activer `navigator.storage.persist()`. Définir les types TS (dont `type Etat = 'rien' | 'en cours' | 'terminé'`).
 - [x] **4. Navigation + layout global** — router (ou onglets) entre les 4 pages ; barre de nav ; styles de base. Réécrit `App.vue`.
-- [ ] **5. Page « Ma classe »** — CRUD élèves, tri alpha, flèches ↑/↓, confirmations.
-- [ ] **6. Page « Thèmes & exercices »** — CRUD thèmes + exercices, cascade, tri, flèches.
-- [ ] **7. Composant tableau de progression réutilisable** — paramétrable : filtre exercices (tous vs session) + mode d'édition (clic-qui-défile vs menu déroulant) ; couleurs + légende. Utilisé par les pages 8 et 9.
-- [ ] **8. Page « Suivi (prof) »** — tableau (tous les exercices), clic-qui-défile.
-- [ ] **9. Page « Session actuelle »** — popup de sélection + tableau réduit + menus déroulants ; session courante stockée en config.
-- [ ] **10. Export Excel (.xlsx)** — ExcelJS, cellules fusionnées par thème, couleurs.
+- [x] **5. Page « Ma classe »** — CRUD élèves, tri alpha, flèches ↑/↓, confirmations.
+- [x] **6. Page « Thèmes & exercices »** — CRUD thèmes + exercices, cascade, tri, flèches.
+- [x] **7. Composant tableau de progression réutilisable** — paramétrable : filtre exercices (tous vs session) + mode d'édition (clic-qui-défile vs menu déroulant) ; couleurs + légende. Utilisé par les pages 8 et 9.
+- [x] **8. Page « Suivi (prof) »** — tableau (tous les exercices), clic-qui-défile.
+- [x] **9. Page « Session actuelle »** — popup de sélection + tableau réduit + menus déroulants ; session courante stockée en config.
+- [x] **10. Export Excel (.xlsx)** — ExcelJS, cellules fusionnées par thème, couleurs.
 - [ ] **11. Export/import JSON** — sauvegarde/restauration + rappel de sauvegarde.
 - [ ] **12. Style / UX / responsive** — tablette/tactile, tableaux larges (scroll horizontal, colonnes figées), états vides.
 - [ ] **13. Test PWA hors-ligne + installation** — offline, persistance, install PWA.

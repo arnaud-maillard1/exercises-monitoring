@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import GestionSauvegarde from './components/GestionSauvegarde.vue'
 
 const navigation = [
   { label: 'Ma classe', to: '/' },
@@ -21,6 +22,8 @@ const navigation = [
           {{ lien.label }}
         </RouterLink>
       </nav>
+
+      <GestionSauvegarde />
     </header>
 
     <main class="app-content">

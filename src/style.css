@@ -943,6 +943,10 @@
 }
 
 @media (max-width: 620px) {
+  .page-heading > .secondary-button {
+    width: 100%;
+  }
+
   .session-heading {
     align-items: stretch;
   }

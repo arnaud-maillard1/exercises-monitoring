@@ -335,8 +335,10 @@
 }
 
 .student-name {
+  min-width: 0;
   color: #0f172a;
   font-size: 1rem;
+  overflow-wrap: anywhere;
 }
 
 .student-actions,
@@ -512,8 +514,11 @@
 }
 
 .exercise-name {
+  min-width: 0;
   color: #334155;
   font-weight: 600;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 @media (max-width: 900px) {
@@ -657,7 +662,9 @@
   color: #334155;
   background: #f8fafc;
   line-height: 1.35;
+  overflow-wrap: anywhere;
   text-align: center;
+  word-break: break-word;
 }
 
 .student-column {
@@ -680,6 +687,8 @@
 
 .student-row-name {
   font-weight: 650;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .progress-cell {
@@ -1080,6 +1089,14 @@
   color: #64748b;
   font-size: 0.875rem;
   line-height: 1.5;
+}
+
+.backup-danger-section {
+  border-bottom: 0;
+}
+
+.backup-danger-section h3 {
+  color: #991b1b;
 }
 
 .backup-file-button {

@@ -515,3 +515,25 @@ export async function restaurerSauvegarde(
         },
     )
 }
+
+export async function recommencerAZero(): Promise<void> {
+    await db.transaction(
+        'rw',
+        [
+            db.eleves,
+            db.themes,
+            db.exercices,
+            db.progressions,
+            db.sessions,
+            db.configuration,
+        ],
+        async () => {
+            await db.progressions.clear()
+            await db.sessions.clear()
+            await db.exercices.clear()
+            await db.themes.clear()
+            await db.eleves.clear()
+            await db.configuration.clear()
+        },
+    )
+}

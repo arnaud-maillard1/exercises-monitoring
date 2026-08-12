@@ -65,7 +65,7 @@ Session     : liste d'exercices sélectionnés — UNE SEULE session courante
 - [x] **8. Page « Suivi (prof) »** — tableau (tous les exercices), clic-qui-défile.
 - [x] **9. Page « Session actuelle »** — popup de sélection + tableau réduit + menus déroulants ; session courante stockée en config.
 - [x] **10. Export Excel (.xlsx)** — ExcelJS, cellules fusionnées par thème, couleurs.
-- [ ] **11. Export/import JSON** — sauvegarde/restauration + rappel de sauvegarde.
+- [x] **11. Export/import JSON** — sauvegarde/restauration + rappel de sauvegarde.
 - [ ] **12. Style / UX / responsive** — tablette/tactile, tableaux larges (scroll horizontal, colonnes figées), états vides.
 - [ ] **13. Test PWA hors-ligne + installation** — offline, persistance, install PWA.
 - [ ] **14. Déploiement GitHub Pages + notice** — `base` Vite = `/exercises-monitoring/`, workflow GitHub Actions ou build manuel ; notice courte pour l'enseignant.

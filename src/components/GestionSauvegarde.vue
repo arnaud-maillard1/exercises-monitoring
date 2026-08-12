@@ -6,6 +6,7 @@ import {
   analyserFichierSauvegarde,
   CLE_DERNIERE_SAUVEGARDE,
   exporterSauvegardeJson,
+  recommencerAZero,
   restaurerSauvegarde,
 } from '../services/sauvegardeJson'
 
@@ -118,6 +119,31 @@ async function selectionnerFichier(evenement: Event): Promise<void> {
     operationEnCours.value = false
   }
 }
+
+async function confirmerReinitialisation(): Promise<void> {
+  const confirmation = window.confirm(
+    'Recommencer à zéro ?\n\n'
+    + 'Tous les élèves, thèmes, exercices, progressions et la session '
+    + 'actuelle seront définitivement supprimés.\n\n'
+    + 'Télécharge une copie avant de continuer si tu souhaites conserver '
+    + 'cette branche.',
+  )
+
+  if (!confirmation) return
+
+  operationEnCours.value = true
+  message.value = null
+  messageErreur.value = null
+
+  try {
+    await recommencerAZero()
+    message.value = 'Une nouvelle branche vide est prête.'
+  } catch (cause: unknown) {
+    messageErreur.value = lireErreur(cause)
+  } finally {
+    operationEnCours.value = false
+  }
+}
 </script>
 
 <template>
@@ -197,6 +223,24 @@ async function selectionnerFichier(evenement: Event): Promise<void> {
                 @change="selectionnerFichier"
               />
             </label>
+          </section>
+
+          <section class="backup-action-section backup-danger-section">
+            <div>
+              <h3>Recommencer à zéro</h3>
+              <p>
+                Supprime la branche actuelle et prépare un espace entièrement
+                vide. Cette action ne peut pas être annulée.
+              </p>
+            </div>
+            <button
+              class="danger-button"
+              type="button"
+              :disabled="operationEnCours"
+              @click="confirmerReinitialisation"
+            >
+              Tout effacer
+            </button>
           </section>
 
           <p

@@ -275,6 +275,7 @@ async function selectionnerEtat(
                     v-for="etat in etats"
                     :key="etat.valeur"
                     :value="etat.valeur"
+                    :class="classeEtat(etat.valeur)"
                   >
                     {{ etat.libelle }}
                   </option>

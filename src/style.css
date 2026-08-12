@@ -743,6 +743,21 @@
   cursor: pointer;
 }
 
+.progress-select option.progress-state-empty {
+  color: #64748b;
+  background: #ffffff;
+}
+
+.progress-select option.progress-state-in-progress {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.progress-select option.progress-state-done {
+  color: #166534;
+  background: #dcfce7;
+}
+
 .progress-state-empty {
   border-color: #cbd5e1;
   color: #64748b;

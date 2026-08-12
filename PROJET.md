@@ -8,6 +8,7 @@ Application web **local-first (PWA)** pour un enseignant : suivre la progression
 
 - Développée sous **Linux**, doit tourner sur **macOS** (via navigateur).
 - **Un seul appareil** : élèves ET prof utilisent la même machine (pas de comptes, pas de multi-utilisateur).
+- L'application travaille sur **une branche active à la fois**. Le nom de la branche est modifiable dans la page « Thèmes & exercices » et sert à identifier les fichiers exportés.
 - **Zéro coût** : aucun hébergement payant, aucun backend. Fonctionne **hors-ligne**.
 - 3 niveaux de progression : **rien / en cours / terminé**.
 
@@ -33,14 +34,16 @@ Exercice    : nom, appartient à 1 thème
 Progression : (élève × exercice) → 'rien' | 'en cours' | 'terminé'
 Session     : liste d'exercices sélectionnés — UNE SEULE session courante
               (historique = évolution future ; concevoir le modèle extensible)
+Configuration : nom de la branche, session courante, date de la dernière copie externe
 ```
 - Suppression **en cascade avec confirmation** (supprimer un thème → ses exercices + progressions ; supprimer un élève/exercice → ses progressions).
 - Ordre d'affichage : par création + **tri alphabétique** + **flèches ↑/↓** pour déplacer une sélection.
+- L'action « Recommencer à zéro » vide toutes les données de la branche active après confirmation.
 
 ## 4. Les 4 pages
 
 1. **Ma classe** — liste des élèves ; ajouter / supprimer.
-2. **Thèmes & exercices** — CRUD thèmes + exercices (exercice rattaché à un thème).
+2. **Thèmes & exercices** — nom de la branche + CRUD thèmes et exercices (exercice rattaché à un thème).
 3. **Suivi (prof)** — tableau : 1 ligne/élève × 1 colonne/exercice, colonnes **groupées par thème**. Édition d'une case = **clic-qui-défile** (rien → en cours → terminé → rien).
 4. **Session actuelle** — bouton « Modifier la session actuelle » (popup de sélection des exercices) + tableau **réduit aux exercices sélectionnés**, édition par **menu déroulant**. Les élèves y marquent leur progression.
 
@@ -48,10 +51,14 @@ Session     : liste d'exercices sélectionnés — UNE SEULE session courante
 
 ## 5. Sauvegarde & fichiers
 
-- **IndexedDB** = mémoire principale (persistante, survit à la fermeture du navigateur).
-- **Export `.xlsx`** (lecture, via ExcelJS) : le **thème en cellule fusionnée horizontale** au-dessus de ses exercices ; chaque exercice dans sa cellule ; 1 ligne/élève ; états en clair + **couleurs par état**.
-- **Export ET import `.json`** = sauvegarde/restauration complète (le vrai filet de sécurité ; réimport depuis Excel écarté car trop fragile).
-- Prévoir un **rappel de sauvegarde** dans l'UI (le cache navigateur peut être vidé).
+- **IndexedDB** est la mémoire principale. Chaque modification y est enregistrée automatiquement et survit à la fermeture du navigateur.
+- L'application ne dépend pas d'un fichier ouvert en permanence et se comporte de la même manière dans Chrome, Edge, Safari et Firefox.
+- **Copie `.suiviexos`** : fichier JSON avec une extension propre à l'application. Il contient la branche complète : nom, élèves, thèmes, exercices, progressions, sessions et configuration.
+- **Télécharger une copie** produit un fichier nommé à partir de la branche et de la date, par exemple `informatique-2026-08-12-1430.suiviexos`.
+- **Ouvrir une copie** valide entièrement le fichier, affiche le nom et un résumé de la branche, puis demande confirmation avant de remplacer les données actuelles dans une transaction unique. Les anciens fichiers `.json` restent acceptés.
+- L'interface affiche un **rappel de sauvegarde externe** lorsqu'aucune copie n'a été téléchargée depuis plus de 7 jours.
+- **Export `.xlsx`** (lecture, via ExcelJS) : le nom de la branche apparaît dans le classeur et son nom de fichier ; le thème est en cellule fusionnée horizontalement au-dessus de ses exercices ; chaque exercice occupe une cellule ; chaque élève occupe une ligne ; les états sont écrits en clair et colorés. Les en-têtes et la colonne des élèves sont figés.
+- Le fichier Excel sert à consulter, imprimer ou transmettre le suivi. Il ne peut pas être réimporté dans l'application.
 
 ## 6. Plan de tâches & avancement
 
@@ -64,11 +71,11 @@ Session     : liste d'exercices sélectionnés — UNE SEULE session courante
 - [x] **7. Composant tableau de progression réutilisable** — paramétrable : filtre exercices (tous vs session) + mode d'édition (clic-qui-défile vs menu déroulant) ; couleurs + légende. Utilisé par les pages 8 et 9.
 - [x] **8. Page « Suivi (prof) »** — tableau (tous les exercices), clic-qui-défile.
 - [x] **9. Page « Session actuelle »** — popup de sélection + tableau réduit + menus déroulants ; session courante stockée en config.
-- [x] **10. Export Excel (.xlsx)** — ExcelJS, cellules fusionnées par thème, couleurs.
-- [x] **11. Export/import JSON** — sauvegarde/restauration + rappel de sauvegarde.
-- [ ] **12. Style / UX / responsive** — tablette/tactile, tableaux larges (scroll horizontal, colonnes figées), états vides.
-- [ ] **13. Test PWA hors-ligne + installation** — offline, persistance, install PWA.
-- [ ] **14. Déploiement GitHub Pages + notice** — `base` Vite = `/exercises-monitoring/`, workflow GitHub Actions ou build manuel ; notice courte pour l'enseignant.
+- [x] **10. Export Excel (.xlsx)** — ExcelJS, nom de branche, cellules fusionnées par thème, couleurs et volets figés.
+- [x] **11. Copies `.suiviexos`** — export/import complet, validation avant remplacement, nom de branche, rappel de copie externe et remise à zéro.
+- [x] **12. Style / UX / responsive** — tablette/tactile, tableaux larges (scroll horizontal, colonne des élèves figée), états vides, focus clavier et retour à la ligne des noms longs.
+- [x] **13. Test PWA hors-ligne + installation** — build de production testé avec `npm run preview`, service worker, fonctionnement hors ligne, persistance et installation validés.
+- [ ] **14. Déploiement GitHub Pages + notice** — `base` Vite = `/exercises-monitoring/`, workflow GitHub Actions ; mode d'emploi court de l'application et instructions d'installation PWA pour Chrome/Edge et Safari sur macOS.
 
 ## 7. Conventions & décisions
 
@@ -76,4 +83,6 @@ Session     : liste d'exercices sélectionnés — UNE SEULE session courante
 - Garder les types **légers**, pas de sur-ingénierie.
 - Commiter au fur et à mesure, un commit par tâche (diffs lisibles).
 - **Ne jamais** supprimer le dossier `.git` (lien GitHub). Ne jamais committer `node_modules`.
+- Le travail quotidien est sauvegardé automatiquement dans IndexedDB. Les fichiers `.suiviexos` sont des **copies externes** destinées à la sauvegarde, au transfert et à la restauration d'une branche.
+- Ne pas rendre le fonctionnement principal dépendant de la File System Access API : la réécriture directe du même fichier n'est pas disponible de manière uniforme dans tous les navigateurs.
 - Attention au déploiement GitHub Pages : le nom du dépôt étant `exercises-monitoring`, il faudra régler `base: '/exercises-monitoring/'` dans `vite.config.ts` (tâche 14).

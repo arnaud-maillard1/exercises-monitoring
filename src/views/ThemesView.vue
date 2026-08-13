@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useNomBranche } from '../composables/useNomBranche'
 import { useThemesExercices } from '../composables/useThemesExercices'
+import { useContexteScolaire } from '../composables/useContexteScolaire'
 import type { Exercice, Theme } from '../data/models'
 
 const {
@@ -21,12 +21,8 @@ const {
   trierExercicesAlphabetiquement,
 } = useThemesExercices()
 
-const {
-  nomBranche,
-  enregistrerNomBranche,
-} = useNomBranche()
+const { brancheActive } = useContexteScolaire()
 
-const nomBrancheSaisi = ref(nomBranche.value)
 const nouveauThemeNom = ref('')
 const nouvelExerciceNom = ref('')
 const themeSelectionneId = ref<number | ''>('')
@@ -38,10 +34,6 @@ const operationEnCours = ref(false)
 const messageErreur = ref<string | null>(null)
 
 const nombreExercices = computed(() => exercices.value.length)
-
-const nomBrancheModifie = computed(() =>
-  nomBrancheSaisi.value.trim() !== nomBranche.value,
-)
 
 const ajoutThemePossible = computed(() =>
   nouveauThemeNom.value.trim().length > 0 && !operationEnCours.value,
@@ -63,10 +55,6 @@ watch(themes, (liste) => {
   }
 })
 
-watch(nomBranche, (nom) => {
-  nomBrancheSaisi.value = nom
-})
-
 function exercicesDuTheme(themeId: number | undefined): Exercice[] {
   if (themeId === undefined) return []
   return exercices.value.filter((exercice) => exercice.themeId === themeId)
@@ -76,12 +64,6 @@ function lireErreur(cause: unknown): string {
   return cause instanceof Error
     ? cause.message
     : "Une erreur inattendue s'est produite"
-}
-
-async function sauvegarderNomBranche(): Promise<void> {
-  await executerOperation(() =>
-    enregistrerNomBranche(nomBrancheSaisi.value),
-  )
 }
 
 async function executerOperation(
@@ -252,7 +234,10 @@ async function demanderTriExercices(theme: Theme): Promise<void> {
     <header class="page-heading">
       <div>
         <h1>Thèmes & exercices</h1>
-        <p>Organiser les exercices par thème pour préparer le suivi.</p>
+        <p>
+          Catalogue partagé de la branche
+          <strong v-if="brancheActive">« {{ brancheActive.nom }} »</strong>.
+        </p>
       </div>
 
       <span class="student-count">
@@ -261,28 +246,6 @@ async function demanderTriExercices(theme: Theme): Promise<void> {
         {{ nombreExercices !== 1 ? 'exercices' : 'exercice' }}
       </span>
     </header>
-
-    <form class="branch-name-form" @submit.prevent="sauvegarderNomBranche">
-      <label class="form-field" for="branch-name">
-        <span>Nom de la branche</span>
-        <input
-          id="branch-name"
-          v-model="nomBrancheSaisi"
-          class="text-input"
-          type="text"
-          maxlength="120"
-          autocomplete="off"
-          placeholder="Par exemple : Informatique"
-        />
-      </label>
-      <button
-        class="secondary-button"
-        type="submit"
-        :disabled="!nomBrancheSaisi.trim() || !nomBrancheModifie || operationEnCours"
-      >
-        Enregistrer le nom
-      </button>
-    </form>
 
     <div class="catalog-toolbar">
       <form class="catalog-form" @submit.prevent="creerTheme">

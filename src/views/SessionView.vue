@@ -82,7 +82,7 @@ async function sauvegarderSelection(): Promise<void> {
   } catch (cause: unknown) {
     messageErreur.value = cause instanceof Error
       ? cause.message
-      : "Impossible d'enregistrer la session"
+      : "Impossible d'enregistrer l’espace élèves"
   } finally {
     enregistrement.value = false
   }
@@ -93,7 +93,7 @@ async function sauvegarderSelection(): Promise<void> {
   <section>
     <header class="page-heading session-heading">
       <div>
-        <h1>Session actuelle</h1>
+        <h1>Espace élèves</h1>
         <p>Les élèves renseignent leur progression pour les exercices sélectionnés.</p>
       </div>
 
@@ -103,7 +103,7 @@ async function sauvegarderSelection(): Promise<void> {
         :disabled="chargement"
         @click="ouvrirSelection"
       >
-        Modifier la session actuelle
+        Choisir les exercices
       </button>
     </header>
 
@@ -112,7 +112,7 @@ async function sauvegarderSelection(): Promise<void> {
     </p>
 
     <p v-if="chargement" class="feedback" aria-live="polite">
-      Chargement de la session…
+      Chargement de l’espace élèves…
     </p>
 
     <template v-else>
@@ -135,7 +135,7 @@ async function sauvegarderSelection(): Promise<void> {
       <form class="session-dialog-form" @submit.prevent="sauvegarderSelection">
         <header class="dialog-heading">
           <div>
-            <h2>Modifier la session actuelle</h2>
+            <h2>Choisir les exercices visibles</h2>
             <p>Choisir les exercices visibles par les élèves.</p>
           </div>
 
@@ -217,7 +217,7 @@ async function sauvegarderSelection(): Promise<void> {
             type="submit"
             :disabled="enregistrement"
           >
-            {{ enregistrement ? 'Enregistrement…' : 'Enregistrer la session' }}
+            {{ enregistrement ? 'Enregistrement…' : 'Enregistrer la sélection' }}
           </button>
         </footer>
       </form>

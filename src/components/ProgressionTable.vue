@@ -184,7 +184,7 @@ async function selectionnerEtat(
 
     <div v-else-if="eleves.length === 0" class="empty-state">
       <h2>Aucun élève</h2>
-      <p>Ajoute des élèves dans « Ma classe » pour afficher le suivi.</p>
+      <p>Ajoute des élèves dans « Classe » pour afficher le suivi.</p>
     </div>
 
     <div v-else-if="exercicesAffiches.length === 0" class="empty-state">

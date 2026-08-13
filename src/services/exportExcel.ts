@@ -1,7 +1,7 @@
 import ExcelJS from 'exceljs'
 import {
-    CLE_NOM_BRANCHE,
-    lireNomBranche,
+    CLE_BRANCHE_ACTIVE,
+    CLE_CLASSE_ACTIVE,
     nomPourFichier,
 } from '../data/configuration'
 import { db } from '../data/database'
@@ -59,33 +59,67 @@ function datePourNomFichier(date: Date): string {
 export async function exporterSuiviExcel(): Promise<void> {
     const donnees = await db.transaction(
         'r',
-        db.eleves,
-        db.themes,
-        db.exercices,
-        db.progressions,
-        db.configuration,
+        [
+            db.branches,
+            db.classes,
+            db.eleves,
+            db.themes,
+            db.exercices,
+            db.progressions,
+            db.configuration,
+        ],
         async () => {
-            const [
-                eleves,
-                themes,
-                exercices,
-                progressions,
-                configurationNom,
-            ] =
-                await Promise.all([
-                    db.eleves.orderBy('ordre').toArray(),
-                    db.themes.orderBy('ordre').toArray(),
-                    db.exercices.toArray(),
-                    db.progressions.toArray(),
-                    db.configuration.get(CLE_NOM_BRANCHE),
-                ])
+            const configuration = await db.configuration.bulkGet([
+                CLE_BRANCHE_ACTIVE,
+                CLE_CLASSE_ACTIVE,
+            ])
+            const brancheId = typeof configuration[0]?.valeur === 'number'
+                ? configuration[0].valeur
+                : null
+            const classeId = typeof configuration[1]?.valeur === 'number'
+                ? configuration[1].valeur
+                : null
+            if (brancheId === null || classeId === null) {
+                throw new Error('Choisis une branche et une classe avant d’exporter')
+            }
+
+            const [branche, classe, eleves, themes] = await Promise.all([
+                db.branches.get(brancheId),
+                db.classes.get(classeId),
+                db.eleves.where('classeId').equals(classeId).toArray(),
+                db.themes.where('brancheId').equals(brancheId).toArray(),
+            ])
+            if (!branche || !classe) {
+                throw new Error('La classe ou la branche sélectionnée n’existe plus')
+            }
+            eleves.sort((a, b) => a.ordre - b.ordre)
+            themes.sort((a, b) => a.ordre - b.ordre)
+            const themeIds = themes.map((theme) => theme.id!)
+            const exercices = themeIds.length
+                ? await db.exercices
+                      .where('themeId')
+                      .anyOf(themeIds)
+                      .toArray()
+                : []
+            const eleveIds = eleves.map((eleve) => eleve.id!)
+            const exerciceIds = new Set(
+                exercices.map((exercice) => exercice.id!),
+            )
+            const progressions = eleveIds.length && exerciceIds.size
+                ? (await db.progressions
+                      .where('eleveId')
+                      .anyOf(eleveIds)
+                      .toArray()
+                  ).filter((item) => exerciceIds.has(item.exerciceId))
+                : []
 
             return {
                 eleves,
                 themes,
                 exercices,
                 progressions,
-                nomBranche: lireNomBranche(configurationNom?.valeur),
+                nomBranche: branche.nom,
+                nomClasse: classe.nom,
             }
         },
     )
@@ -153,7 +187,7 @@ export async function exporterSuiviExcel(): Promise<void> {
     const derniereColonne = exercicesOrdonnes.length + 1
     feuille.mergeCells(1, 1, 1, derniereColonne)
     const titre = feuille.getCell(1, 1)
-    titre.value = `Suivi d'exercices — ${donnees.nomBranche}`
+    titre.value = `Suivi d'exercices — ${donnees.nomBranche} — ${donnees.nomClasse}`
     titre.font = {
         name: 'Arial',
         size: 18,
@@ -340,6 +374,6 @@ export async function exporterSuiviExcel(): Promise<void> {
 
     telechargerFichier(
         octets,
-        `suivi-${nomPourFichier(donnees.nomBranche)}-${datePourNomFichier(maintenant)}.xlsx`,
+        `suivi-${nomPourFichier(donnees.nomBranche)}-${nomPourFichier(donnees.nomClasse)}-${datePourNomFichier(maintenant)}.xlsx`,
     )
 }

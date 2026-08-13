@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import GestionSauvegarde from './components/GestionSauvegarde.vue'
+import GestionContexteScolaire from './components/GestionContexteScolaire.vue'
 
 const navigation = [
-  { label: 'Ma classe', to: '/' },
+  { label: 'Classe', to: '/' },
   { label: 'Thèmes & exercices', to: '/themes' },
   { label: 'Suivi', to: '/suivi' },
-  { label: 'Session actuelle', to: '/session' },
+  { label: 'Espace élèves', to: '/session' },
 ]
 </script>
 
@@ -25,6 +26,8 @@ const navigation = [
 
       <GestionSauvegarde />
     </header>
+
+    <GestionContexteScolaire />
 
     <main class="app-content">
       <RouterView />

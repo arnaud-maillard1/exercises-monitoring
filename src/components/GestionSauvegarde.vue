@@ -79,7 +79,7 @@ async function exporter(): Promise<void> {
 
   try {
     await exporterSauvegardeJson()
-    message.value = 'La copie de la branche a été téléchargée.'
+    message.value = 'La copie complète a été téléchargée.'
   } catch (cause: unknown) {
     messageErreur.value = lireErreur(cause)
   } finally {
@@ -102,7 +102,8 @@ async function selectionnerFichier(evenement: Event): Promise<void> {
     const resultat = await analyserFichierSauvegarde(fichier)
     const detail = resultat.resume
     const confirmation = window.confirm(
-      `Ouvrir la copie de la branche « ${detail.nomBranche} » ?\n\n`
+      'Ouvrir cette copie complète ?\n\n'
+      + `${detail.branches} branche(s), ${detail.classes} classe(s), `
       + `${detail.eleves} élève(s), ${detail.themes} thème(s), `
       + `${detail.exercices} exercice(s) et `
       + `${detail.progressions} progression(s).\n\n`
@@ -112,7 +113,7 @@ async function selectionnerFichier(evenement: Event): Promise<void> {
     if (!confirmation) return
 
     await restaurerSauvegarde(resultat.sauvegarde)
-    message.value = `La branche « ${detail.nomBranche} » est maintenant ouverte.`
+    message.value = 'La copie est maintenant ouverte.'
   } catch (cause: unknown) {
     messageErreur.value = lireErreur(cause)
   } finally {
@@ -124,9 +125,10 @@ async function confirmerReinitialisation(): Promise<void> {
   const confirmation = window.confirm(
     'Recommencer à zéro ?\n\n'
     + 'Tous les élèves, thèmes, exercices, progressions et la session '
-    + 'actuelle seront définitivement supprimés.\n\n'
+    + 'actuelle, ainsi que toutes les classes et branches, seront '
+    + 'définitivement supprimés.\n\n'
     + 'Télécharge une copie avant de continuer si tu souhaites conserver '
-    + 'cette branche.',
+    + 'ces données.',
   )
 
   if (!confirmation) return
@@ -137,7 +139,7 @@ async function confirmerReinitialisation(): Promise<void> {
 
   try {
     await recommencerAZero()
-    message.value = 'Une nouvelle branche vide est prête.'
+    message.value = 'Une classe et une branche vides sont prêtes.'
   } catch (cause: unknown) {
     messageErreur.value = lireErreur(cause)
   } finally {
@@ -164,8 +166,8 @@ async function confirmerReinitialisation(): Promise<void> {
       <div class="backup-dialog-content">
         <header class="dialog-heading">
           <div>
-            <h2>Sauvegardes de la branche</h2>
-            <p>Conserver ou ouvrir une copie en dehors du navigateur.</p>
+            <h2>Sauvegardes de l’application</h2>
+            <p>Conserver ou ouvrir une copie complète en dehors du navigateur.</p>
           </div>
 
           <button
@@ -191,7 +193,7 @@ async function confirmerReinitialisation(): Promise<void> {
             <div>
               <h3>Sauvegarder une copie</h3>
               <p>
-                Télécharge une copie complète de la branche dans un fichier
+                Télécharge toutes les classes, branches et progressions dans un fichier
                 <code>.suiviexos</code>.
               </p>
             </div>
@@ -209,8 +211,8 @@ async function confirmerReinitialisation(): Promise<void> {
             <div>
               <h3>Ouvrir une copie</h3>
               <p>
-                Remplace la branche actuellement ouverte par celle du fichier
-                sélectionné, après confirmation.
+                Remplace toutes les données actuelles par celles du fichier
+                sélectionné, après confirmation. Les anciennes copies restent compatibles.
               </p>
             </div>
             <label class="secondary-button backup-file-button">
@@ -229,8 +231,8 @@ async function confirmerReinitialisation(): Promise<void> {
             <div>
               <h3>Recommencer à zéro</h3>
               <p>
-                Supprime la branche actuelle et prépare un espace entièrement
-                vide. Cette action ne peut pas être annulée.
+                Supprime toutes les classes, branches et progressions, puis
+                prépare un espace vide. Cette action ne peut pas être annulée.
               </p>
             </div>
             <button

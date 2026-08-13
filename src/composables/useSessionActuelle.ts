@@ -1,17 +1,21 @@
 import { liveQuery } from 'dexie'
 import { onScopeDispose, readonly, ref } from 'vue'
+import {
+    CLE_BRANCHE_ACTIVE,
+    CLE_CLASSE_ACTIVE,
+} from '../data/configuration'
 import { db } from '../data/database'
 import type { Exercice, Session, Theme } from '../data/models'
+import { useContexteScolaire } from './useContexteScolaire'
 
-const CLE_SESSION_COURANTE = 'sessionCouranteId'
-
-function lireIdentifiantSession(valeur: unknown): number | null {
+function lireIdentifiant(valeur: unknown): number | null {
     return typeof valeur === 'number' && Number.isInteger(valeur)
         ? valeur
         : null
 }
 
 export function useSessionActuelle() {
+    const { brancheActiveId, classeActiveId } = useContexteScolaire()
     const session = ref<Session | null>(null)
     const themes = ref<Theme[]>([])
     const exercices = ref<Exercice[]>([])
@@ -19,25 +23,40 @@ export function useSessionActuelle() {
     const erreur = ref<string | null>(null)
 
     const subscription = liveQuery(async () => {
-        const [configuration, themesStockes, exercicesStockes] =
-            await Promise.all([
-                db.configuration.get(CLE_SESSION_COURANTE),
-                db.themes.orderBy('ordre').toArray(),
-                db.exercices.toArray(),
-            ])
+        const configuration = await db.configuration.bulkGet([
+            CLE_BRANCHE_ACTIVE,
+            CLE_CLASSE_ACTIVE,
+        ])
+        const brancheId = lireIdentifiant(configuration[0]?.valeur)
+        const classeId = lireIdentifiant(configuration[1]?.valeur)
+        if (brancheId === null || classeId === null) {
+            return { session: null, themes: [], exercices: [] }
+        }
 
-        const sessionId = lireIdentifiantSession(configuration?.valeur)
-        const sessionStockee = sessionId === null
-            ? null
-            : await db.sessions.get(sessionId) ?? null
-
+        const themesStockes = await db.themes
+            .where('brancheId')
+            .equals(brancheId)
+            .toArray()
+        themesStockes.sort((a, b) => a.ordre - b.ordre)
+        const themeIds = themesStockes.map((theme) => theme.id!)
+        const exercicesStockes = themeIds.length
+            ? await db.exercices
+                  .where('themeId')
+                  .anyOf(themeIds)
+                  .toArray()
+            : []
         exercicesStockes.sort((premier, second) => {
             if (premier.themeId !== second.themeId) {
                 return premier.themeId - second.themeId
             }
-
             return premier.ordre - second.ordre
         })
+
+        const sessionStockee =
+            (await db.sessions
+                .where('[classeId+brancheId]')
+                .equals([classeId, brancheId])
+                .first()) ?? null
 
         return {
             session: sessionStockee,
@@ -54,9 +73,10 @@ export function useSessionActuelle() {
         },
         error: (cause: unknown) => {
             chargement.value = false
-            erreur.value = cause instanceof Error
-                ? cause.message
-                : "Impossible de charger la session actuelle"
+            erreur.value =
+                cause instanceof Error
+                    ? cause.message
+                    : 'Impossible de charger l’espace élèves'
         },
     })
 
@@ -65,50 +85,52 @@ export function useSessionActuelle() {
     async function enregistrerSession(
         exerciceIds: number[],
     ): Promise<void> {
+        const brancheId = brancheActiveId.value
+        const classeId = classeActiveId.value
+        if (brancheId === null || classeId === null) {
+            throw new Error('Choisis une branche et une classe.')
+        }
         const idsUniques = [...new Set(exerciceIds)]
 
         await db.transaction(
             'rw',
             db.sessions,
-            db.configuration,
             db.exercices,
+            db.themes,
             async () => {
-                const exercicesExistants = await db.exercices.bulkGet(idsUniques)
-                const idsValides = idsUniques.filter(
-                    (_id, index) => exercicesExistants[index] !== undefined,
+                const themesValides = await db.themes
+                    .where('brancheId')
+                    .equals(brancheId)
+                    .primaryKeys()
+                const themesSet = new Set(themesValides)
+                const exercicesExistants = await db.exercices.bulkGet(
+                    idsUniques,
                 )
-                const configuration = await db.configuration.get(
-                    CLE_SESSION_COURANTE,
-                )
-                const sessionId = lireIdentifiantSession(
-                    configuration?.valeur,
-                )
-                const sessionExistante = sessionId === null
-                    ? undefined
-                    : await db.sessions.get(sessionId)
+                const idsValides = idsUniques.filter((_id, index) => {
+                    const exercice = exercicesExistants[index]
+                    return exercice !== undefined && themesSet.has(exercice.themeId)
+                })
+                const sessionExistante = await db.sessions
+                    .where('[classeId+brancheId]')
+                    .equals([classeId, brancheId])
+                    .first()
                 const maintenant = Date.now()
 
-                let id: number
-
                 if (sessionExistante?.id !== undefined) {
-                    id = sessionExistante.id
-                    await db.sessions.update(id, {
+                    await db.sessions.update(sessionExistante.id, {
                         exerciceIds: idsValides,
                         modifieLe: maintenant,
                     })
                 } else {
-                    id = await db.sessions.add({
-                        nom: 'Session actuelle',
+                    await db.sessions.add({
+                        classeId,
+                        brancheId,
+                        nom: 'Espace élèves',
                         exerciceIds: idsValides,
                         creeLe: maintenant,
                         modifieLe: maintenant,
                     })
                 }
-
-                await db.configuration.put({
-                    cle: CLE_SESSION_COURANTE,
-                    valeur: id,
-                })
             },
         )
     }

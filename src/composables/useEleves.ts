@@ -2,15 +2,27 @@ import { liveQuery } from 'dexie'
 import { onScopeDispose, readonly, ref } from 'vue'
 import { db } from '../data/database'
 import type { Eleve } from '../data/models'
+import { useContexteScolaire } from './useContexteScolaire'
+import { CLE_CLASSE_ACTIVE } from '../data/configuration'
 
 export function useEleves() {
+    const { classeActiveId } = useContexteScolaire()
     const eleves = ref<Eleve[]>([])
     const chargement = ref(true)
     const erreur = ref<string | null>(null)
 
-    const subscription = liveQuery(() =>
-        db.eleves.orderBy('ordre').toArray(),
-    ).subscribe({
+    const subscription = liveQuery(async () => {
+        const configuration = await db.configuration.get(CLE_CLASSE_ACTIVE)
+        const id = typeof configuration?.valeur === 'number'
+            ? configuration.valeur
+            : null
+        if (id === null) return []
+        const liste = await db.eleves
+            .where('classeId')
+            .equals(id)
+            .toArray()
+        return liste.sort((a, b) => a.ordre - b.ordre)
+    }).subscribe({
         next: (resultat) => {
             eleves.value = resultat
             chargement.value = false
@@ -33,12 +45,25 @@ export function useEleves() {
             throw new Error("Le nom de l'élève est obligatoire")
         }
 
+        const classeId = classeActiveId.value
+        if (classeId === null) {
+            throw new Error('Choisis une classe avant d’ajouter un élève.')
+        }
+
         return db.transaction('rw', db.eleves, async () => {
-            const dernier = await db.eleves.orderBy('ordre').last()
+            const liste = await db.eleves
+                .where('classeId')
+                .equals(classeId)
+                .toArray()
+            const ordreMaximum = liste.reduce(
+                (maximum, eleve) => Math.max(maximum, eleve.ordre),
+                -1,
+            )
 
             return db.eleves.add({
+                classeId,
                 nom: nomNettoye,
-                ordre: (dernier?.ordre ?? -1) + 1,
+                ordre: ordreMaximum + 1,
                 creeLe: Date.now(),
             })
         })
@@ -74,7 +99,12 @@ export function useEleves() {
         direction: 'haut' | 'bas',
     ): Promise<void> {
         await db.transaction('rw', db.eleves, async () => {
-            const liste = await db.eleves.orderBy('ordre').toArray()
+            if (classeActiveId.value === null) return
+            const liste = await db.eleves
+                .where('classeId')
+                .equals(classeActiveId.value)
+                .toArray()
+            liste.sort((a, b) => a.ordre - b.ordre)
             const index = liste.findIndex((eleve) => eleve.id === id)
             const indexCible = direction === 'haut' ? index - 1 : index + 1
 
@@ -98,7 +128,11 @@ export function useEleves() {
 
     async function trierAlphabetiquement(): Promise<void> {
         await db.transaction('rw', db.eleves, async () => {
-            const liste = await db.eleves.toArray()
+            if (classeActiveId.value === null) return
+            const liste = await db.eleves
+                .where('classeId')
+                .equals(classeActiveId.value)
+                .toArray()
 
             liste.sort((premier, second) =>
                 premier.nom.localeCompare(second.nom, 'fr', {

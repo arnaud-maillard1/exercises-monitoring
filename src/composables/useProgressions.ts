@@ -8,6 +8,10 @@ import type {
     Progression,
     Theme,
 } from '../data/models'
+import {
+    CLE_BRANCHE_ACTIVE,
+    CLE_CLASSE_ACTIVE,
+} from '../data/configuration'
 
 export function useProgressions() {
     const eleves = ref<Eleve[]>([])
@@ -18,17 +22,56 @@ export function useProgressions() {
     const erreur = ref<string | null>(null)
 
     const subscription = liveQuery(async () => {
-        const [
-            elevesStockes,
-            themesStockes,
-            exercicesStockes,
-            progressionsStockees,
-        ] = await Promise.all([
-            db.eleves.orderBy('ordre').toArray(),
-            db.themes.orderBy('ordre').toArray(),
-            db.exercices.toArray(),
-            db.progressions.toArray(),
+        const configuration = await db.configuration.bulkGet([
+            CLE_BRANCHE_ACTIVE,
+            CLE_CLASSE_ACTIVE,
         ])
+        const brancheId = typeof configuration[0]?.valeur === 'number'
+            ? configuration[0].valeur
+            : null
+        const classeId = typeof configuration[1]?.valeur === 'number'
+            ? configuration[1].valeur
+            : null
+        if (brancheId === null || classeId === null) {
+            return {
+                eleves: [],
+                themes: [],
+                exercices: [],
+                progressions: [],
+            }
+        }
+
+        const elevesStockes = await db.eleves
+            .where('classeId')
+            .equals(classeId)
+            .toArray()
+        elevesStockes.sort((a, b) => a.ordre - b.ordre)
+        const themesStockes = await db.themes
+            .where('brancheId')
+            .equals(brancheId)
+            .toArray()
+        themesStockes.sort((a, b) => a.ordre - b.ordre)
+        const themeIds = themesStockes.map((theme) => theme.id!)
+        const exercicesStockes = themeIds.length
+            ? await db.exercices
+                  .where('themeId')
+                  .anyOf(themeIds)
+                  .toArray()
+            : []
+        const eleveIds = elevesStockes.map((eleve) => eleve.id!)
+        const exerciceIds = exercicesStockes.map(
+            (exercice) => exercice.id!,
+        )
+        const progressionsStockees =
+            eleveIds.length && exerciceIds.length
+                ? (await db.progressions
+                      .where('eleveId')
+                      .anyOf(eleveIds)
+                      .toArray()
+                  ).filter((progression) =>
+                      exerciceIds.includes(progression.exerciceId),
+                  )
+                : []
 
         exercicesStockes.sort((premier, second) => {
             if (premier.themeId !== second.themeId) {

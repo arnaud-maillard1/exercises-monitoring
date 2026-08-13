@@ -2,6 +2,9 @@
 import { computed, ref } from 'vue'
 import { useEleves } from '../composables/useEleves'
 import type { Eleve } from '../data/models'
+import { useContexteScolaire } from '../composables/useContexteScolaire'
+
+const { classeActive } = useContexteScolaire()
 
 const {
   eleves,
@@ -134,8 +137,8 @@ async function trier(): Promise<void> {
   <section>
     <header class="page-heading">
       <div>
-        <h1>Ma classe</h1>
-        <p>Ajouter, renommer et organiser les élèves.</p>
+        <h1>Classe : {{ classeActive?.nom ?? '—' }}</h1>
+        <p>Ajouter, renommer et organiser les élèves de cette classe.</p>
       </div>
 
       <span class="student-count">

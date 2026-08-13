@@ -4,6 +4,7 @@ import App from './App.vue'
 import { db } from './data/database'
 import { demanderStockagePersistant } from './data/persistence'
 import router from './router'
+import { initialiserContexteScolaire } from './data/contexte'
 
 const app = createApp(App)
 app.use(router)
@@ -11,6 +12,7 @@ app.mount('#app')
 
 async function initialiserStockage() {
     await db.open()
+    await initialiserContexteScolaire()
 
     const persistant = await demanderStockagePersistant()
     console.info(
@@ -26,4 +28,3 @@ void initialiserStockage().catch((erreur: unknown) => {
         erreur,
     )
 })
-

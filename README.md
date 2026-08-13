@@ -37,16 +37,24 @@ Cette fonction nécessite macOS Sonoma 14 ou une version plus récente.
 
 ## Utilisation
 
-### 1. Nommer la branche
+### 1. Préparer les classes et les branches
 
-Dans **Thèmes & exercices**, indiquez le nom de la branche, par exemple
-« Informatique » ou « Mécanique ».
+En haut de l’application, cliquez sur **Gérer les classes et branches**.
 
-Ce nom sera utilisé dans les fichiers de sauvegarde et les exports Excel.
+- Une **classe** contient sa propre liste d’élèves, par exemple « 9VG1 ».
+- Une **branche** contient ses thèmes et exercices, par exemple « Mathématiques ».
+- Une classe peut utiliser plusieurs branches et une branche peut être utilisée
+  par plusieurs classes.
 
-### 2. Préparer la classe
+Lors de la création d’une classe ou d’une branche, cochez les associations
+souhaitées. Vous pouvez les modifier plus tard dans la même fenêtre.
 
-Dans **Ma classe** :
+Les deux menus situés en haut de l’application permettent ensuite de choisir
+la classe, puis l’une des branches qu’elle utilise.
+
+### 2. Préparer les élèves d’une classe
+
+Choisissez d’abord la classe en haut de l’application, puis ouvrez **Classe** :
 
 - ajoutez les élèves ;
 - utilisez **Modifier** pour corriger un nom ;
@@ -56,9 +64,9 @@ Dans **Ma classe** :
 
 La suppression d’un élève efface également ses progressions.
 
-### 3. Préparer les exercices
+### 3. Préparer les exercices d’une branche
 
-Dans **Thèmes & exercices** :
+Choisissez la branche, puis ouvrez **Thèmes & exercices** :
 
 1. créez un thème ;
 2. créez des exercices en sélectionnant leur thème ;
@@ -66,6 +74,9 @@ Dans **Thèmes & exercices** :
 
 La suppression d’un thème supprime également ses exercices et les
 progressions correspondantes.
+
+Les exercices sont partagés par toutes les classes associées à la branche.
+Chaque classe conserve cependant ses propres progressions.
 
 ### 4. Suivre la progression
 
@@ -80,20 +91,22 @@ Les couleurs permettent de repérer rapidement chaque état.
 Le bouton **Exporter le suivi en Excel** télécharge une version lisible,
 imprimable et partageable du tableau.
 
+Le fichier contient uniquement la classe et la branche actuellement choisies.
+
 Le fichier Excel ne permet pas de restaurer les données dans l’application.
 
-### 5. Préparer une session pour les élèves
+### 5. Préparer l’espace élèves
 
-Dans **Session actuelle** :
+Dans **Espace élèves** :
 
-1. cliquez sur **Modifier la session actuelle** ;
+1. cliquez sur **Choisir les exercices** ;
 2. sélectionnez les exercices à afficher ;
 3. enregistrez la sélection.
 
 Les élèves peuvent ensuite choisir leur progression avec les menus
 déroulants.
 
-Les pages **Suivi** et **Session actuelle** utilisent les mêmes
+Les pages **Suivi** et **Espace élèves** utilisent les mêmes
 progressions. Une modification faite dans une page apparaît dans l’autre.
 
 ## Sauvegardes
@@ -106,13 +119,13 @@ externe, car les données du navigateur peuvent être effacées.
 Dans **Sauvegarde** :
 
 - **Télécharger une copie** crée un fichier `.suiviexos` contenant toute
-  la branche ;
-- **Ouvrir une copie** remplace la branche actuelle par celle du fichier,
+  l’application : classes, branches, élèves, exercices et progressions ;
+- **Ouvrir une copie** remplace toutes les données actuelles par celles du fichier,
   après confirmation ;
-- **Tout effacer** permet de recommencer avec une branche vide.
+- **Tout effacer** permet de recommencer avec une classe et une branche vides.
 
 Avant d’ouvrir une autre copie ou de tout effacer, téléchargez une copie
-de la branche actuelle si vous souhaitez la conserver.
+des données actuelles si vous souhaitez les conserver.
 
 ## Fonctionnement hors ligne
 
@@ -122,7 +135,7 @@ hors ligne.
 Les données restent sur l’appareil utilisé. Elles ne sont pas synchronisées
 automatiquement avec un autre ordinateur ou un autre navigateur.
 
-Pour transférer une branche, téléchargez son fichier `.suiviexos`, puis
+Pour transférer les données, téléchargez le fichier `.suiviexos`, puis
 ouvrez cette copie sur l’autre appareil.
 
 ## Développement

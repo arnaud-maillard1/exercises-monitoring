@@ -2,6 +2,8 @@ import { liveQuery } from 'dexie'
 import { onScopeDispose, readonly, ref } from 'vue'
 import { db } from '../data/database'
 import type { Exercice, Theme } from '../data/models'
+import { useContexteScolaire } from './useContexteScolaire'
+import { CLE_BRANCHE_ACTIVE } from '../data/configuration'
 
 function comparerNoms(
     premier: { nom: string },
@@ -32,16 +34,32 @@ async function retirerExercicesDesSessions(
 }
 
 export function useThemesExercices() {
+    const { brancheActiveId } = useContexteScolaire()
     const themes = ref<Theme[]>([])
     const exercices = ref<Exercice[]>([])
     const chargement = ref(true)
     const erreur = ref<string | null>(null)
 
     const subscription = liveQuery(async () => {
-        const [themesStockes, exercicesStockes] = await Promise.all([
-            db.themes.orderBy('ordre').toArray(),
-            db.exercices.toArray(),
-        ])
+        const configuration = await db.configuration.get(CLE_BRANCHE_ACTIVE)
+        const id = typeof configuration?.valeur === 'number'
+            ? configuration.valeur
+            : null
+        if (id === null) {
+            return { themes: [], exercices: [] }
+        }
+        const themesStockes = await db.themes
+            .where('brancheId')
+            .equals(id)
+            .toArray()
+        themesStockes.sort((a, b) => a.ordre - b.ordre)
+        const themeIds = themesStockes.map((theme) => theme.id!)
+        const exercicesStockes = themeIds.length
+            ? await db.exercices
+                  .where('themeId')
+                  .anyOf(themeIds)
+                  .toArray()
+            : []
 
         exercicesStockes.sort((premier, second) => {
             if (premier.themeId !== second.themeId) {
@@ -79,12 +97,25 @@ export function useThemesExercices() {
             throw new Error('Le nom du thème est obligatoire')
         }
 
+        const brancheId = brancheActiveId.value
+        if (brancheId === null) {
+            throw new Error('Choisis une branche avant d’ajouter un thème.')
+        }
+
         return db.transaction('rw', db.themes, async () => {
-            const dernier = await db.themes.orderBy('ordre').last()
+            const liste = await db.themes
+                .where('brancheId')
+                .equals(brancheId)
+                .toArray()
+            const ordreMaximum = liste.reduce(
+                (maximum, theme) => Math.max(maximum, theme.ordre),
+                -1,
+            )
 
             return db.themes.add({
+                brancheId,
                 nom: nomNettoye,
-                ordre: (dernier?.ordre ?? -1) + 1,
+                ordre: ordreMaximum + 1,
                 creeLe: Date.now(),
             })
         })
@@ -132,7 +163,12 @@ export function useThemesExercices() {
         direction: 'haut' | 'bas',
     ): Promise<void> {
         await db.transaction('rw', db.themes, async () => {
-            const liste = await db.themes.orderBy('ordre').toArray()
+            if (brancheActiveId.value === null) return
+            const liste = await db.themes
+                .where('brancheId')
+                .equals(brancheActiveId.value)
+                .toArray()
+            liste.sort((a, b) => a.ordre - b.ordre)
             const index = liste.findIndex((theme) => theme.id === id)
             const indexCible = direction === 'haut' ? index - 1 : index + 1
 
@@ -156,7 +192,11 @@ export function useThemesExercices() {
 
     async function trierThemesAlphabetiquement(): Promise<void> {
         await db.transaction('rw', db.themes, async () => {
-            const liste = await db.themes.toArray()
+            if (brancheActiveId.value === null) return
+            const liste = await db.themes
+                .where('brancheId')
+                .equals(brancheActiveId.value)
+                .toArray()
             liste.sort(comparerNoms)
 
             await db.themes.bulkPut(

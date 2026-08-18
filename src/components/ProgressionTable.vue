@@ -13,9 +13,11 @@ interface GroupeTheme {
 const props = withDefaults(defineProps<{
   exerciceIds?: readonly number[] | null
   modeEdition?: ModeEdition
+  compactParDefaut?: boolean
 }>(), {
   exerciceIds: null,
   modeEdition: 'clic',
+  compactParDefaut: false,
 })
 
 const {
@@ -83,6 +85,8 @@ const progressionParCellule = computed(() => {
 
   return index
 })
+
+const affichageCompact = ref(props.compactParDefaut)
 
 function cleCellule(eleveId: number, exerciceId: number): string {
   return `${eleveId}:${exerciceId}`
@@ -154,27 +158,23 @@ async function selectionnerEtat(
 </script>
 
 <template>
-  <div class="progression-workspace">
+  <div class="progression-workspace" :class="{ 'progression-workspace-compact': affichageCompact }">
     <div class="progress-legend" aria-label="Légende des progressions">
-      <span
-        v-for="etat in etats"
-        :key="etat.valeur"
-        class="legend-item"
-      >
-        <span
-          class="legend-swatch"
-          :class="classeEtat(etat.valeur)"
-          aria-hidden="true"
-        />
+      <span v-for="etat in etats" :key="etat.valeur" class="legend-item">
+        <span class="legend-swatch" :class="classeEtat(etat.valeur)" aria-hidden="true" />
         {{ etat.libelle }}
       </span>
+
+      <button class="secondary-button compact-toggle-button" type="button" :aria-pressed="affichageCompact"
+        @click="affichageCompact = !affichageCompact">
+        {{ affichageCompact
+          ? 'Aérer le tableau'
+          : 'Condenser le tableau'
+        }}
+      </button>
     </div>
 
-    <p
-      v-if="messageErreur || erreur"
-      class="feedback feedback-error"
-      role="alert"
-    >
+    <p v-if="messageErreur || erreur" class="feedback feedback-error" role="alert">
       {{ messageErreur ?? erreur }}
     </p>
 
@@ -192,13 +192,7 @@ async function selectionnerEtat(
       <p>Ajoute ou sélectionne des exercices pour afficher le suivi.</p>
     </div>
 
-    <div
-      v-else
-      class="progress-table-scroll"
-      role="region"
-      aria-label="Tableau de progression"
-      tabindex="0"
-    >
+    <div v-else class="progress-table-scroll" role="region" aria-label="Tableau de progression" tabindex="0">
       <table class="progress-table">
         <caption class="visually-hidden">
           Progression des élèves par thème et exercice
@@ -208,27 +202,14 @@ async function selectionnerEtat(
             <th class="student-column" scope="col" rowspan="2">
               Élève
             </th>
-            <th
-              v-for="groupe in groupes"
-              :key="groupe.theme.id"
-              class="theme-column"
-              scope="colgroup"
-              :colspan="groupe.exercices.length"
-            >
+            <th v-for="groupe in groupes" :key="groupe.theme.id" class="theme-column" scope="colgroup"
+              :colspan="groupe.exercices.length">
               {{ groupe.theme.nom }}
             </th>
           </tr>
           <tr>
-            <template
-              v-for="groupe in groupes"
-              :key="groupe.theme.id"
-            >
-              <th
-                v-for="exercice in groupe.exercices"
-                :key="exercice.id"
-                class="exercise-column"
-                scope="col"
-              >
+            <template v-for="groupe in groupes" :key="groupe.theme.id">
+              <th v-for="exercice in groupe.exercices" :key="exercice.id" class="exercise-column" scope="col">
                 {{ exercice.nom }}
               </th>
             </template>
@@ -241,42 +222,21 @@ async function selectionnerEtat(
               {{ eleve.nom }}
             </th>
 
-            <template
-              v-for="groupe in groupes"
-              :key="groupe.theme.id"
-            >
-              <td
-                v-for="exercice in groupe.exercices"
-                :key="exercice.id"
-                class="progress-cell"
-              >
-                <button
-                  v-if="modeEdition === 'clic'"
-                  class="progress-button"
-                  :class="classeEtat(etatPour(eleve, exercice))"
-                  type="button"
-                  :disabled="estEnCours(eleve, exercice)"
+            <template v-for="groupe in groupes" :key="groupe.theme.id">
+              <td v-for="exercice in groupe.exercices" :key="exercice.id" class="progress-cell">
+                <button v-if="modeEdition === 'clic'" class="progress-button"
+                  :class="classeEtat(etatPour(eleve, exercice))" type="button" :disabled="estEnCours(eleve, exercice)"
                   :aria-label="`${eleve.nom}, ${exercice.nom} : ${libelles[etatPour(eleve, exercice)]}. Cliquer pour changer.`"
-                  @click="faireDefilerEtat(eleve, exercice)"
-                >
+                  @click="faireDefilerEtat(eleve, exercice)">
                   {{ libelles[etatPour(eleve, exercice)] }}
                 </button>
 
-                <select
-                  v-else
-                  class="progress-select"
-                  :class="classeEtat(etatPour(eleve, exercice))"
-                  :value="etatPour(eleve, exercice)"
-                  :disabled="estEnCours(eleve, exercice)"
+                <select v-else class="progress-select" :class="classeEtat(etatPour(eleve, exercice))"
+                  :value="etatPour(eleve, exercice)" :disabled="estEnCours(eleve, exercice)"
                   :aria-label="`Progression de ${eleve.nom} pour ${exercice.nom}`"
-                  @change="selectionnerEtat(eleve, exercice, $event)"
-                >
-                  <option
-                    v-for="etat in etats"
-                    :key="etat.valeur"
-                    :value="etat.valeur"
-                    :class="classeEtat(etat.valeur)"
-                  >
+                  @change="selectionnerEtat(eleve, exercice, $event)">
+                  <option v-for="etat in etats" :key="etat.valeur" :value="etat.valeur"
+                    :class="classeEtat(etat.valeur)">
                     {{ etat.libelle }}
                   </option>
                 </select>

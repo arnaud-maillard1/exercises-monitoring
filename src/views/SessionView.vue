@@ -122,8 +122,9 @@ async function sauvegarderSelection(): Promise<void> {
       </p>
 
       <ProgressionTable
-        mode-edition="menu"
+        mode-edition="clic"
         :exercice-ids="exerciceIdsSession"
+        compact-par-defaut
       />
     </template>
 

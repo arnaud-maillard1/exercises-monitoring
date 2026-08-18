@@ -1503,3 +1503,58 @@
     width: 100%;
   }
 }
+
+.compact-toggle-button {
+  min-height: 34px;
+  margin-left: auto;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+.progression-workspace-compact .progress-table-scroll {
+  margin-top: 12px;
+}
+
+.progression-workspace-compact .progress-legend {
+  padding-block: 8px;
+}
+
+.progression-workspace-compact .student-row-name {
+  padding: 4px 10px;
+  line-height: 1.15;
+}
+
+.progression-workspace-compact .progress-cell {
+  padding: 2px;
+}
+
+.progression-workspace-compact .progress-button {
+  min-height: 36px;
+  padding: 4px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.progression-workspace-compact .student-column {
+  width: 1%;
+  min-width: 120px;
+  max-width: 170px;
+  padding-inline: 8px;
+}
+
+.progression-workspace-compact .theme-column {
+  min-width: 0;
+  padding: 7px 6px;
+}
+
+.progression-workspace-compact .exercise-column,
+.progression-workspace-compact .progress-cell {
+  width: 1%;
+  min-width: 84px;
+  max-width: 120px;
+}
+
+.progression-workspace-compact .exercise-column {
+  padding: 7px 5px;
+  overflow-wrap: anywhere;
+}
